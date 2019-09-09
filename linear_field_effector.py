@@ -63,6 +63,8 @@ from bpy.props import *
 from bpy_extras.io_utils import ExportHelper
 from bpy.types import Operator
 from os.path import dirname, join
+from mathutils import Vector
+
 
 
 """ needed? """
@@ -210,7 +212,8 @@ def addEffectorObj(objList, rig):
 	prevActive = bpy.context.view_layer.objects.active
 
 	#default expression, change later with different falloff etc
-	default_expression = "1/(.000001+objDist)*scale"
+	# default_expression = "1/(.000001+objDist)*scale"
+    default_expression = '0 if objDist > 4 else scale'
 
 	#empty list versus obj list?
 	emptyList = []
@@ -223,13 +226,19 @@ def addEffectorObj(objList, rig):
 		if obj.type=="EMPTY": continue
 		##############################################
 		# Add the empty intermediate object/parent
-		bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=obj.location)
+
+        # o = bpy.context.object
+        o = obj
+        local_bbox_center = 0.125 * sum((Vector(b) for b in o.bound_box), Vector())
+        global_bbox_center = o.matrix_world @ local_bbox_center
+
+		bpy.ops.object.empty_add(type='CUBE', align='WORLD', location=global_bbox_center)
 		empty = bpy.context.active_object
 		empty.name = "effr.empty"
 		obj.select_set(state=True)
 		preParent = obj.parent
 		bpy.ops.object.parent_set(type='OBJECT', keep_transform=True)
-		bpy.context.object.empty_display_size = 0.1
+		bpy.context.object.empty_display_size = 0.4
 		if (preParent):
 			bpy.ops.object.select_all(action='DESELECT')
 
@@ -291,7 +300,7 @@ def addEffectorObj(objList, rig):
 		varR_dist.name = "objDist"
 		varR_dist.targets[0].id = rig
 		varR_dist.targets[0].bone_target = 'base'
-		varR_dist.targets[1].id = obj
+		varR_dist.targets[1].id = empty
 
 
 		varR_scale = driverRot.variables.new()
@@ -321,7 +330,7 @@ def addEffectorObj(objList, rig):
 		varS_dist.name = "objDist"
 		varS_dist.targets[0].id = rig
 		varS_dist.targets[0].bone_target = 'base'
-		varS_dist.targets[1].id = obj
+		varS_dist.targets[1].id = empty
 
 
 		varS_scale = driverScale.variables.new()
