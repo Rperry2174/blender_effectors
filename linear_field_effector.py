@@ -350,8 +350,8 @@ def addEffectorObj(objList, rig):
 		varS_scale.targets[0].transform_type = 'SCALE_Z'
 		varS_scale.targets[0].bone_target = 'base'
 
-        scale_expression = '0 if objDist > 6 else 1 if effector_x < empty_x else 1 - log(effector_x - empty_x) + 1/(.000001 + objDist)*scale'
-
+        #scale_expression = '0 if objDist > 40 else 1 if effector_x < (empty_x * 3) else 1 - log(effector_x - (empty_x * 2)) + 1/(.000001 + objDist)*scale'
+        scale_expression = '0 if objDist > 12 else 1 if effector_x < (empty_x * 3) else 1 / (effector_x - (empty_x * 3) + 0.01) * scale'
 		driverScale.expression = scale_expression
 
 
