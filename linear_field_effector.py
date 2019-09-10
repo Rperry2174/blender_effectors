@@ -324,6 +324,16 @@ def addEffectorObj(objList, rig):
 		driverScale = obj.constraints[preConts].driver_add("influence").driver
 		driverScale.type = 'SCRIPTED'
 
+		varL_effector_x = driverScale.variables.new()
+		varL_effector_x.type = 'TRANSFORMS'
+		varL_effector_x.name = "effector_x"
+		varL_effector_x.targets[0].id = rig
+
+		varL_empty_x = driverScale.variables.new()
+		varL_empty_x.type = 'TRANSFORMS'
+		varL_empty_x.name = "empty_x"
+		varL_empty_x.targets[0].id = empty
+
 		# var for objDist two targets, 1st is "base" second is "distanceRef"
 		varS_dist = driverScale.variables.new()
 		varS_dist.type = 'LOC_DIFF'
@@ -340,7 +350,9 @@ def addEffectorObj(objList, rig):
 		varS_scale.targets[0].transform_type = 'SCALE_Z'
 		varS_scale.targets[0].bone_target = 'base'
 
-		driverScale.expression = default_expression
+        scale_expression = '0 if objDist > 6 else 1 if effector_x < empty_x else 1 - log(effector_x - empty_x) + 1/(.000001 + objDist)*scale'
+
+		driverScale.expression = scale_expression
 
 
 ########################################################################################
